@@ -81,18 +81,12 @@ jobs:
           #### 正常版本(推荐)
           - [64位(常用)](${{ env.DOWNLOAD_URL }}/Clash.Meta_${{ env.VERSION }}_x64-setup.exe) | [ARM64(不常用)](${{ env.DOWNLOAD_URL }}/Clash.Meta_${{ env.VERSION }}_arm64-setup.exe)
 
+          #### 便携版(免安装，解压即用)
+          - [64位便携版](${{ env.DOWNLOAD_URL }}/Clash.Meta_${{ env.VERSION }}_x64_portable.zip) | [ARM64便携版](${{ env.DOWNLOAD_URL }}/Clash.Meta_${{ env.VERSION }}_arm64_portable.zip)
+          
           #### 内置Webview2版(体积较大，仅在企业版系统或无法安装webview2时使用)
           - [64位](${{ env.DOWNLOAD_URL }}/Clash.Meta_${{ env.VERSION }}_x64_fixed_webview2-setup.exe) | [ARM64](${{ env.DOWNLOAD_URL }}/Clash.Meta_${{ env.VERSION }}_arm64_fixed_webview2-setup.exe)
-
-          ### macOS
-          - [Apple M芯片](${{ env.DOWNLOAD_URL }}/Clash.Meta_${{ env.VERSION }}_aarch64.dmg) | [Intel芯片](${{ env.DOWNLOAD_URL }}/Clash.Meta_${{ env.VERSION }}_x64.dmg)
-
-          ### Linux
-          #### DEB包(Debian系) 使用 apt ./路径 安装
-          - [64位](${{ env.DOWNLOAD_URL }}/Clash.Meta_${{ env.VERSION }}_amd64.deb) | [ARM64](${{ env.DOWNLOAD_URL }}/Clash.Meta_${{ env.VERSION }}_arm64.deb) | [ARMv7](${{ env.DOWNLOAD_URL }}/Clash.Meta_${{ env.VERSION }}_armhf.deb)
-
-          #### RPM包(Redhat系) 使用 dnf ./路径 安装
-          - [64位](${{ env.DOWNLOAD_URL }}/Clash.Meta-${{ env.VERSION }}-1.x86_64.rpm) | [ARM64](${{ env.DOWNLOAD_URL }}/Clash.Meta-${{ env.VERSION }}-1.aarch64.rpm) | [ARMv7](${{ env.DOWNLOAD_URL }}/Clash.Meta-${{ env.VERSION }}-1.armhfp.rpm)        
+              
 
           Created at ${{ env.BUILDTIME }}.
           EOF
@@ -119,8 +113,8 @@ jobs:
       tag_name: autobuild
       dry_run: false
 
-  autobuild-x86-windows-macos-linux:
-    name: Autobuild x86 Windows, MacOS and Linux
+  autobuild-x86-windows:
+    name: Autobuild x86 Windows
     needs: [check_commit, update_tag]
     if: ${{ needs.check_commit.outputs.should_run == 'true' }}
     strategy:
@@ -130,13 +124,7 @@ jobs:
           - os: windows-latest
             target: x86_64-pc-windows-msvc
           - os: windows-latest
-            target: aarch64-pc-windows-msvc
-          - os: macos-latest
-            target: aarch64-apple-darwin
-          - os: macos-latest
-            target: x86_64-apple-darwin
-          - os: ubuntu-22.04
-            target: x86_64-unknown-linux-gnu
+            target: aarch64-pc-windows-msvc          
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout Repository
@@ -225,160 +213,34 @@ jobs:
           tauriScript: pnpm
           args: --target ${{ matrix.target }}
           # includeUpdaterJson: true
+      
+      - name: Package portable (Windows)
+        if: matrix.os == 'windows-latest'
+        run: pnpm portable ${{ matrix.target }}
 
-  autobuild-arm-linux:
-    name: Autobuild ARM Linux
-    needs: [check_commit, update_tag]
-    if: ${{ needs.check_commit.outputs.should_run == 'true' }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          # It should be ubuntu-22.04 to match the cross-compilation environment
-          # ortherwise it is hard to resolve the dependencies
-          - os: ubuntu-22.04
-            target: aarch64-unknown-linux-gnu
-            arch: arm64
-          - os: ubuntu-22.04
-            target: armv7-unknown-linux-gnueabihf
-            arch: armhf
-    runs-on: ${{ matrix.os }}
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v7
-
-      - name: Install Rust Stable
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: '1.96.1'
-          targets: ${{ matrix.target }}
-
-      - name: Add Rust Target
-        run: rustup target add ${{ matrix.target }}
-
-      - name: Rust Cache
-        uses: Swatinem/rust-cache@v2
-        with:
-          save-if: ${{ github.ref == 'refs/heads/dev' }}
-          prefix-key: 'v1-rust'
-          key: 'rust-shared-stable-${{ matrix.os }}-${{ matrix.target }}'
-          workspaces: |
-            . -> target
-          cache-all-crates: true
-          cache-workspace-crates: true
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v6.0.9
-        with:
-          run_install: false
-
-      - name: Install Node
-        uses: actions/setup-node@v6
-        with:
-          node-version: '24.18.0'
-          cache: 'pnpm'
-
-      - name: Pnpm Cache
-        uses: actions/cache@v6
-        with:
-          path: ~/.pnpm-store
-          key: 'pnpm-shared-stable-${{ matrix.os }}-${{ matrix.target }}'
-          restore-keys: |
-            pnpm-shared-stable-${{ matrix.os }}-${{ matrix.target }}
-
-      - name: Pnpm install and check
-        run: |
-          pnpm i
-          pnpm run prebuild ${{ matrix.target }}
-
-      - name: Release ${{ env.TAG_CHANNEL }} Version
-        run: pnpm release-version autobuild-latest
-
-      - name: 'Setup for linux'
-        run: |-
-          sudo ls -lR /etc/apt/
-
-          cat > /tmp/sources.list << EOF
-          deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu jammy main multiverse universe restricted
-          deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu jammy-security main multiverse universe restricted
-          deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu jammy-updates main multiverse universe restricted
-          deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu jammy-backports main multiverse universe restricted
-
-          deb [arch=armhf,arm64] http://ports.ubuntu.com/ubuntu-ports jammy main multiverse universe restricted
-          deb [arch=armhf,arm64] http://ports.ubuntu.com/ubuntu-ports jammy-security main multiverse universe restricted
-          deb [arch=armhf,arm64] http://ports.ubuntu.com/ubuntu-ports jammy-updates main multiverse universe restricted
-          deb [arch=armhf,arm64] http://ports.ubuntu.com/ubuntu-ports jammy-backports main multiverse universe restricted
-          EOF
-
-          sudo mv /etc/apt/sources.list /etc/apt/sources.list.default
-          sudo mv /tmp/sources.list /etc/apt/sources.list
-
-          sudo dpkg --add-architecture ${{ matrix.arch }}
-          sudo apt update
-
-          sudo apt install -y \
-            libxslt1.1:${{ matrix.arch }} \
-            libwebkit2gtk-4.1-dev:${{ matrix.arch }} \
-            libayatana-appindicator3-dev:${{ matrix.arch }} \
-            libssl-dev:${{ matrix.arch }} \
-            patchelf:${{ matrix.arch }} \
-            librsvg2-dev:${{ matrix.arch }}
-
-      - name: Install aarch64 tools
-        if: matrix.target == 'aarch64-unknown-linux-gnu'
-        run: |
-          sudo apt install -y \
-            gcc-aarch64-linux-gnu \
-            g++-aarch64-linux-gnu
-
-      - name: Install armv7 tools
-        if: matrix.target == 'armv7-unknown-linux-gnueabihf'
-        run: |
-          sudo apt install -y \
-            gcc-arm-linux-gnueabihf \
-            g++-arm-linux-gnueabihf
-
-      - name: Add Rust Target
-        run: |
-          # Ensure cross target is installed for the pinned toolchain; fallback without explicit toolchain if needed
-          rustup target add ${{ matrix.target }} --toolchain 1.95.0 || rustup target add ${{ matrix.target }}
-          rustup target list --installed
-          echo "Rust target ${{ matrix.target }} installed."
-
-      - name: Tauri Build for Linux
-        run: |
-          export PKG_CONFIG_ALLOW_CROSS=1
-          if [ "${{ matrix.target }}" == "aarch64-unknown-linux-gnu" ]; then
-            export PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig/:$PKG_CONFIG_PATH
-            export PKG_CONFIG_SYSROOT_DIR=/usr/aarch64-linux-gnu/
-          elif [ "${{ matrix.target }}" == "armv7-unknown-linux-gnueabihf" ]; then
-            export PKG_CONFIG_PATH=/usr/lib/arm-linux-gnueabihf/pkgconfig/:$PKG_CONFIG_PATH
-            export PKG_CONFIG_SYSROOT_DIR=/usr/arm-linux-gnueabihf/
-          fi
-          pnpm build --target ${{ matrix.target }}
+      - name: Upload portable to Release
+        if: matrix.os == 'windows-latest'
         env:
-          NODE_OPTIONS: '--max_old_space_size=4096'
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
-
-      - name: Get Version
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          sudo apt-get update
-          sudo apt-get install jq
-          echo "VERSION=$(cat package.json | jq '.version' | tr -d '"')" >> $GITHUB_ENV
-          echo "BUILDTIME=$(TZ=Asia/Shanghai date)" >> $GITHUB_ENV
+          $target = "${{ matrix.target }}"
+          $arch = if ($target -match "aarch64") { "arm64" } else { "x64" }
+          $version = "${{ github.ref_name }}" -replace "^v", ""
+          $portableFile = "Clash.Meta_${version}_${arch}_portable.zip"
+          
+          # 查找脚本生成的便携包
+          if (Test-Path $portableFile) {
+            gh release upload "${{ github.ref_name }}" $portableFile --clobber
+          } elseif (Test-Path "target/$target/release/$portableFile") {
+            gh release upload "${{ github.ref_name }}" "target/$target/release/$portableFile" --clobber
+          } else {
+            Write-Host "Portable package not found, checking common locations..."
+            Get-ChildItem -Path "target/$target" -Recurse -Filter "*portable*" | ForEach-Object {
+              gh release upload "${{ github.ref_name }}" $_.FullName --clobber
+            }
+          } 
 
-      - name: Upload Release
-        uses: softprops/action-gh-release@v3
-        with:
-          tag_name: ${{ env.TAG_NAME }}
-          name: 'Clash Meta ${{ env.TAG_CHANNEL }}'
-          prerelease: true
-          token: ${{ secrets.GITHUB_TOKEN }}
-          files: |
-            target/${{ matrix.target }}/release/bundle/deb/*.deb
-            target/${{ matrix.target }}/release/bundle/rpm/*.rpm
-
+  
   autobuild-x86-arm-windows_webview2:
     name: Autobuild x86 and ARM Windows with WebView2
     needs: [check_commit, update_tag]
@@ -500,82 +362,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  notify-telegram:
-    name: Notify Telegram
-    runs-on: ubuntu-latest
-    needs:
-      [
-        update_tag,
-        autobuild-x86-windows-macos-linux,
-        autobuild-arm-linux,
-        autobuild-x86-arm-windows_webview2,
-      ]
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-
-      - name: Fetch UPDATE logs
-        id: fetch_update_logs
-        run: bash ./scripts/extract_update_logs.sh
-        shell: bash
-
-      - name: Install Node
-        uses: actions/setup-node@v6
-        with:
-          node-version: '24.18.0'
-
-      - uses: pnpm/action-setup@v6.0.9
-        name: Install pnpm
-        with:
-          run_install: false
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Release AutoBuild Version
-        run: pnpm release-version autobuild-latest
-
-      - name: Get Version and Release Info
-        run: |
-          sudo apt-get update
-          sudo apt-get install jq
-          echo "VERSION=$(cat package.json | jq '.version' | tr -d '"')" >> $GITHUB_ENV
-          echo "DOWNLOAD_URL=https://github.com/clash-verge-rev/clash-verge-rev/releases/download/autobuild" >> $GITHUB_ENV
-          echo "BUILDTIME=$(TZ=Asia/Shanghai date)" >> $GITHUB_ENV
-
-      - name: Generate release.txt
-        run: |
-          if [ -z "$UPDATE_LOGS" ]; then
-            echo "No update logs found, using default message"
-            UPDATE_LOGS="More new features are now supported. Check for detailed changelog soon."
-          else
-            echo "Using found update logs"
-          fi
-
-          cat > release.txt << EOF
-          $UPDATE_LOGS
-
-          ## 下载地址
-
-          ### Windows (不再支持Win7)
-          #### 正常版本(推荐)
-          - [64位(常用)](${{ env.DOWNLOAD_URL }}/Clash.Meta_${{ env.VERSION }}_x64-setup.exe) | [ARM64(不常用)](${{ env.DOWNLOAD_URL }}/Clash.Meta_${{ env.VERSION }}_arm64-setup.exe)
-
-          #### 内置Webview2版(体积较大，仅在企业版系统或无法安装webview2时使用)
-          - [64位](${{ env.DOWNLOAD_URL }}/Clash.Meta_${{ env.VERSION }}_x64_fixed_webview2-setup.exe) | [ARM64](${{ env.DOWNLOAD_URL }}/Clash.Meta_${{ env.VERSION }}_arm64_fixed_webview2-setup.exe)
-
-          ### macOS
-          - [Apple M芯片](${{ env.DOWNLOAD_URL }}/Clash.Meta_${{ env.VERSION }}_aarch64.dmg) | [Intel芯片](${{ env.DOWNLOAD_URL }}/Clash.Meta_${{ env.VERSION }}_x64.dmg)
-
-          ### Linux
-          #### DEB包(Debian系) 使用 apt ./路径 安装
-          - [64位](${{ env.DOWNLOAD_URL }}/Clash.Meta_${{ env.VERSION }}_amd64.deb) | [ARM64](${{ env.DOWNLOAD_URL }}/Clash.Meta_${{ env.VERSION }}_arm64.deb) | [ARMv7](${{ env.DOWNLOAD_URL }}/Clash.Meta_${{ env.VERSION }}_armhf.deb)
-
-          #### RPM包(Redhat系) 使用 dnf ./路径 安装
-          - [64位](${{ env.DOWNLOAD_URL }}/Clash.Meta-${{ env.VERSION }}-1.x86_64.rpm) | [ARM64](${{ env.DOWNLOAD_URL }}/Clash.Meta-${{ env.VERSION }}-1.aarch64.rpm) | [ARMv7](${{ env.DOWNLOAD_URL }}/Clash.Meta-${{ env.VERSION }}-1.armhfp.rpm)
-
-          
-          Created at ${{ env.BUILDTIME }}.
-          EOF
-
-      
+       
