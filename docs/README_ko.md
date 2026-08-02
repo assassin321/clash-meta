@@ -1,7 +1,7 @@
 <h1 align="center">
   <img src="../src-tauri/icons/icon.png" alt="Clash" width="128" />
   <br>
-  <a href="https://github.com/zzzgydi/clash-verge">Clash Verge</a>의 후속 프로젝트
+  <a href="https://github.com/zzzgydi/clash-verge">Clash Meta</a>의 후속 프로젝트
   <br>
 </h1>
 

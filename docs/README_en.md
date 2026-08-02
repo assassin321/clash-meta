@@ -1,7 +1,7 @@
 <h1 align="center">
   <img src="../src-tauri/icons/icon.png" alt="Clash" width="128" />
   <br>
-  Continuation of <a href="https://github.com/zzzgydi/clash-verge">Clash Verge</a>
+  Continuation of <a href="https://github.com/zzzgydi/clash-verge">Clash Meta</a>
   <br>
 </h1>
 

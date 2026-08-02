@@ -108,7 +108,7 @@ jobs:
           echo "TAG_NAME=$TAG_REF" >> $GITHUB_ENV
           VERSION=$(echo "$TAG_REF" | sed 's/^v//')
           echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "DOWNLOAD_URL=https://github.com/clash-Meta-rev/clash-Meta-rev/releases/download/$TAG_REF" >> $GITHUB_ENV
+          echo "DOWNLOAD_URL=https://github.com/assassin321/clash-meta/releases/download/$TAG_REF" >> $GITHUB_ENV
         shell: bash
 
       - run: |
@@ -127,6 +127,9 @@ jobs:
           ### Windows (不再支持Win7)
           #### 正常版本(推荐)
           - [64位(常用)](${{ env.DOWNLOAD_URL }}/Clash.Meta_${{ env.VERSION }}_x64-setup.exe) | [ARM64(不常用)](${{ env.DOWNLOAD_URL }}/Clash.Meta_${{ env.VERSION }}_arm64-setup.exe)
+          
+          #### 便携版(免安装，解压即用)
+          - [64位便携版](${{ env.DOWNLOAD_URL }}/Clash.Meta_${{ env.VERSION }}_x64_portable.zip) | [ARM64便携版](${{ env.DOWNLOAD_URL }}/Clash.Meta_${{ env.VERSION }}_arm64_portable.zip)
 
           #### 内置Webview2版(体积较大，仅在企业版系统或无法安装webview2时使用)
           - [64位](${{ env.DOWNLOAD_URL }}/Clash.Meta_${{ env.VERSION }}_x64_fixed_webview2-setup.exe) | [ARM64](${{ env.DOWNLOAD_URL }}/Clash.Meta_${{ env.VERSION }}_arm64_fixed_webview2-setup.exe)
@@ -286,6 +289,32 @@ jobs:
           subject-path: |
             target/${{ matrix.target }}/release/bundle/deb/*.deb
             target/${{ matrix.target }}/release/bundle/rpm/*.rpm
+      
+      - name: Package portable (Windows)
+        if: matrix.os == 'windows-latest'
+        run: pnpm portable ${{ matrix.target }}
+
+      - name: Upload portable to Release
+        if: matrix.os == 'windows-latest'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $target = "${{ matrix.target }}"
+          $arch = if ($target -match "aarch64") { "arm64" } else { "x64" }
+          $version = "${{ github.ref_name }}" -replace "^v", ""
+          $portableFile = "Clash.Meta_${version}_${arch}_portable.zip"
+          
+          # 查找脚本生成的便携包
+          if (Test-Path $portableFile) {
+            gh release upload "${{ github.ref_name }}" $portableFile --clobber
+          } elseif (Test-Path "target/$target/release/$portableFile") {
+            gh release upload "${{ github.ref_name }}" "target/$target/release/$portableFile" --clobber
+          } else {
+            Write-Host "Portable package not found, checking common locations..."
+            Get-ChildItem -Path "target/$target" -Recurse -Filter "*portable*" | ForEach-Object {
+              gh release upload "${{ github.ref_name }}" $_.FullName --clobber
+            }
+          }
 
   release-for-linux-arm:
     name: Release Build for Linux ARM
@@ -610,7 +639,7 @@ jobs:
       - name: Submit to Winget
         uses: vedantmgoyal9/winget-releaser@main
         with:
-          identifier: ClashMetaRev.ClashMetaRev
+          identifier: ClashMeta.ClashMeta
           version: ${{env.VERSION}}
           release-tag: v${{env.VERSION}}
           installers-regex: '_(arm64|x64|x86)-setup\.exe$'
@@ -654,7 +683,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install jq
           echo "VERSION=$(cat package.json | jq '.version' | tr -d '"')" >> $GITHUB_ENV
-          echo "DOWNLOAD_URL=https://github.com/clash-Meta-rev/clash-Meta-rev/releases/download/v$(cat package.json | jq '.version' | tr -d '"')" >> $GITHUB_ENV
+          echo "DOWNLOAD_URL=https://github.com/assassin321/clash-meta/releases/download/v$(cat package.json | jq '.version' | tr -d '"')" >> $GITHUB_ENV
           echo "BUILDTIME=$(TZ=Asia/Shanghai date)" >> $GITHUB_ENV
 
       - name: Generate release.txt
@@ -674,6 +703,10 @@ jobs:
           ### Windows (不再支持Win7)
           #### 正常版本(推荐)
           - [64位(常用)](${{ env.DOWNLOAD_URL }}/Clash.Meta_${{ env.VERSION }}_x64-setup.exe) | [ARM64(不常用)](${{ env.DOWNLOAD_URL }}/Clash.Meta_${{ env.VERSION }}_arm64-setup.exe)
+          
+          #### 便携版(免安装，解压即用)
+          - [64位便携版](${{ env.DOWNLOAD_URL }}/Clash.Meta_${{ env.VERSION }}_x64_portable.zip) | [ARM64便携版](${{ env.DOWNLOAD_URL }}/Clash.Meta_${{ env.VERSION }}_arm64_portable.zip)
+
 
           #### 内置Webview2版(体积较大，仅在企业版系统或无法安装webview2时使用)
           - [64位](${{ env.DOWNLOAD_URL }}/Clash.Meta_${{ env.VERSION }}_x64_fixed_webview2-setup.exe) | [ARM64](${{ env.DOWNLOAD_URL }}/Clash.Meta_${{ env.VERSION }}_arm64_fixed_webview2-setup.exe)
