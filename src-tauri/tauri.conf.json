@@ -30,7 +30,7 @@
   "identifier": "io.github.assassin321.clash-meta",
   "plugins": {
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDM0NTg5QUVEQUMwODgyQkEKUldTNmdnaXM3WnBZTkxBOGVtNUwyamt5bStwcGVLVkl6bGNtSkJWcDJicGszZks2MEZob0NldGcK",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDg4MUU4MTcxRTFBRjE1RDQKUldUVUZhL2hjWUVlaUpiSW93NFd1c0VnSUhndFFvWlp3RE1DdFFBemJUVlFiTEUwS0kxTkJOSS8K",
       "endpoints": [
         "https://update.hwdns.net/https://github.com/assassin321/clash-meta/releases/download/updater/update-proxy.json",
         "https://gh-proxy.org/https://github.com/assassin321/clash-meta/releases/download/updater/update-proxy.json",
