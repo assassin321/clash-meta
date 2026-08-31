@@ -699,16 +699,42 @@ async function resolveServiceBundle() {
     }
 
     for (const { sourceFile, targetFile, targetPath } of files) {
-      const extractedFile = await findExtractedFile(tempDir, sourceFile)
-      if (!extractedFile) {
-        throw new Error(`Expected binary ${sourceFile} not found in archive`)
+      // 扫描解压目录
+      const entries = await fsp.readdir(tempDir, { withFileTypes: true })
+      const exeFiles = entries
+        .filter((e) => e.isFile() && e.name.endsWith('.exe'))
+        .map((e) => e.name)
+
+      // 根据目标文件名特征匹配
+      const targetBase = targetFile.replace(/\.exe$/i, '')
+      let matchedName = null
+
+      if (targetBase.includes('install')) {
+        matchedName = exeFiles.find((f) => f.includes('install'))
+      } else if (targetBase.includes('uninstall')) {
+        matchedName = exeFiles.find((f) => f.includes('uninstall'))
+      } else {
+        // 主程序：找不包含 install/uninstall 的 exe
+        matchedName = exeFiles.find(
+          (f) => !f.includes('install') && !f.includes('uninstall'),
+        )
       }
 
+      if (!matchedName) {
+        throw new Error(
+          `Could not find matching binary for ${targetFile} in archive. Available: ${exeFiles.join(', ')}`,
+        )
+      }
+
+      const extractedFile = path.join(tempDir, matchedName)
       await fsp.copyFile(extractedFile, targetPath)
       if (platform !== 'win32') await fsp.chmod(targetPath, 0o755)
       await updateHashCache(targetPath)
-      log_success(`Extracted service file: ${targetFile}`)
+      log_success(
+        `Extracted service file: ${targetFile} (from ${matchedName})`,
+      )
     }
+
 
     log_success(`service bundle finished: ${archiveFile}`)
   } finally {
