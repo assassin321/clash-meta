@@ -1,6 +1,6 @@
 [package]
 name = "clash-meta"
-version = "2.5.5"
+version = "2.5.3"
 description = "clash-meta"
 authors = ["assassin321","zzzgydi", "Tunglies", "wonfen", "MystiPanda"]
 license = "GPL-3.0-only"
