@@ -136,6 +136,7 @@ mod app_init {
             cmd::open_app_dir,
             cmd::open_logs_dir,
             cmd::open_core_dir,
+            cmd::get_portable_flag,
             cmd::get_network_interfaces,
             cmd::get_system_hostname,
             cmd::restart_app,
@@ -264,6 +265,8 @@ pub fn run() -> std::process::ExitCode {
     utils::linux::workarounds::apply_nvidia_dmabuf_renderer_workaround();
     #[cfg(target_os = "linux")]
     utils::linux::workarounds::apply_wayland_webkit_fix();
+
+    let _ = utils::dirs::init_portable_flag();
 
     let builder = app_init::setup_plugins(tauri::Builder::default())
         .setup(|app| {

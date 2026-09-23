@@ -2,6 +2,7 @@ use crate::core::{CoreManager, handle, manager::RunningMode};
 use anyhow::Result;
 use async_trait::async_trait;
 use clash_verge_logging::{Type, logging};
+use once_cell::sync::OnceCell;
 use std::{
     fs,
     path::{Path, PathBuf},
@@ -18,14 +19,43 @@ pub static APP_ID: &str = "io.github.assassin321.clash-meta.dev";
 #[cfg(feature = "verge-dev")]
 pub static BACKUP_DIR: &str = "clash-meta-backup-dev";
 
+pub static PORTABLE_FLAG: OnceCell<bool> = OnceCell::new();
+
 pub static CLASH_CONFIG: &str = "config.yaml";
 pub static VERGE_CONFIG: &str = "meta.yaml";
 pub static PROFILE_YAML: &str = "profiles.yaml";
 /// Marks that the one-shot raise of too-short auto-update intervals has already run.
 pub static UPDATE_INTERVAL_MIGRATED: &str = ".update-interval-migrated";
 
+/// init portable flag
+pub fn init_portable_flag() -> Result<()> {
+    use tauri::utils::platform::current_exe;
+
+    let app_exe = current_exe()?;
+    if let Some(dir) = app_exe.parent() {
+        let dir = PathBuf::from(dir).join(".config/PORTABLE");
+
+        if dir.exists() {
+            PORTABLE_FLAG.get_or_init(|| true);
+        }
+    }
+    PORTABLE_FLAG.get_or_init(|| false);
+    Ok(())
+}
+
 /// Uses the same platform data resolver as Tauri, including before its handle exists.
 pub fn app_home_dir() -> Result<PathBuf> {
+    // 便携模式检查
+    let flag = PORTABLE_FLAG.get().unwrap_or(&false);
+    if *flag {
+        let app_exe = tauri::utils::platform::current_exe()?;
+        let app_exe = dunce::canonicalize(app_exe)?;
+        let app_dir = app_exe
+            .parent()
+            .ok_or_else(|| anyhow::anyhow!("failed to get the portable app dir"))?;
+        return Ok(PathBuf::from(app_dir).join(".config").join(APP_ID));
+    }
+
     ::dirs::data_dir()
         .map(|root| root.join(APP_ID))
         .ok_or_else(|| anyhow::anyhow!("Failed to get the app home directory"))

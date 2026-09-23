@@ -487,6 +487,11 @@ async fn initialize_config_files() -> Result<()> {
 
 /// Initializes configuration required before Tauri setup.
 pub async fn init_config() -> Result<()> {
+    // We do not need init_portable_flag here anymore due to lib.rs will to the things
+    // let _ = dirs::init_portable_flag();
+
+    // We do not need init_log here anymore due to resolve will to the things
+    
     #[cfg(target_os = "macos")]
     migrate_legacy_macos_logs().await?;
 
