@@ -39,7 +39,7 @@ pub enum Type {
     Network,
     ProxyMode,
     Validate,
-    Clash Meta,
+    ClashMeta,
 }
 
 impl fmt::Display for Type {
