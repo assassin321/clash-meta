@@ -1,6 +1,6 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "identifier": "io.github.clash-meta.clash-meta",
+  "identifier": "io.github.assassin321.clash-meta",
   "bundle": {
     "targets": ["nsis"],
     "windows": {

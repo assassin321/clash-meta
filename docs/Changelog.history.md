@@ -2003,7 +2003,7 @@
 ### Break Changes
 
 - 更改配置文件路径到标准目录(可以保证卸载时没有残留)
-- 更改 appid 为 `io.github.clash-meta.clash-meta`
+- 更改 appid 为 `io.github.assassin321.clash-meta`
 - 建议卸载旧版本后再安装新版本，该版本安装后不会使用旧版配置文件，你可以手动将旧版配置文件迁移到新版配置文件目录下
 
 ### Features

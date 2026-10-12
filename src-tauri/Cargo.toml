@@ -26,7 +26,7 @@ clippy = ["tauri/test"]
 perf-harness = ["dep:tauri-plugin-wdio-webdriver"]
 
 [package.metadata.bundle]
-identifier = "io.github.clash-meta.clash-meta"
+identifier = "io.github.assassin321.clash-meta"
 
 [build-dependencies]
 tauri-build = { version = "2.7.1", features = [] }

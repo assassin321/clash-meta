@@ -1,5 +1,5 @@
 {
-  "identifier": "io.github.clash-meta.perf-harness",
+  "identifier": "io.github.assassin321.perf-harness",
   "build": {
     "frontendDist": "../target/perf/dist",
     "beforeBuildCommand": "",
