@@ -128,7 +128,7 @@ export function LiteModeViewer({ ref }: { ref?: Ref<DialogRef> }) {
                   input: {
                     endAdornment: (
                       <InputAdornment position="end">
-                        {t('shared.units.minutes')}
+                        {t('shared.units.seconds')}
                       </InputAdornment>
                     ),
                   },

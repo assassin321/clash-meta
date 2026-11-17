@@ -322,7 +322,7 @@
         "delay": "Otomatik Hafif Mod Giriş Gecikmesi"
       },
       "messages": {
-        "autoEnterHint": "Pencere kapatıldığında, Hafif Mod {{n}} dakika sonra otomatik olarak etkinleştirilecek"
+        "autoEnterHint": "Pencere kapatıldığında, Hafif Mod {{n}} saniye sonra otomatik olarak etkinleştirilecek"
       }
     },
     "backup": {

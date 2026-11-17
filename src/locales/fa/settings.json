@@ -322,7 +322,7 @@
         "delay": "تأخیر ورود خودکار به حالت LightWeight"
       },
       "messages": {
-        "autoEnterHint": "هنگام بستن پنجره، حالت LightWeight پس از {{n}} دقیقه به طور خودکار فعال می‌شود"
+        "autoEnterHint": "هنگام بستن پنجره، حالت LightWeight پس از {{n}} ثانیه به طور خودکار فعال می‌شود"
       }
     },
     "backup": {

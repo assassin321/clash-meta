@@ -322,7 +322,7 @@
         "delay": "Auto Enter LightWeight Mode Delay"
       },
       "messages": {
-        "autoEnterHint": "When closing the window, LightWeight Mode will be automatically activated after {{n}} minutes"
+        "autoEnterHint": "When closing the window, LightWeight Mode will be automatically activated after {{n}} seconds"
       }
     },
     "backup": {

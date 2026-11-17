@@ -322,7 +322,7 @@
         "delay": "Atraso para Entrar Automaticamente no Modo Leve"
       },
       "messages": {
-        "autoEnterHint": "Ao fechar a janela, o Modo Leve será ativado automaticamente após {{n}} minutos"
+        "autoEnterHint": "Ao fechar a janela, o Modo Leve será ativado automaticamente após {{n}} segundos"
       }
     },
     "backup": {

@@ -322,7 +322,7 @@
         "delay": "Verzögerung beim automatischen Wechsel in den Leichtgewichtigen Modus"
       },
       "messages": {
-        "autoEnterHint": "Nach dem Schließen des Fensters wird der Leichtgewichtige Modus automatisch nach {{n}} Minuten aktiviert."
+        "autoEnterHint": "Nach dem Schließen des Fensters wird der Leichtgewichtige Modus automatisch nach {{n}} Sekunden aktiviert."
       }
     },
     "backup": {

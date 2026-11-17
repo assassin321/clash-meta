@@ -322,7 +322,7 @@
         "delay": "경량 모드 자동 진입 지연"
       },
       "messages": {
-        "autoEnterHint": "창을 닫으면 {{n}}분 후 자동으로 경량 모드가 활성화됩니다"
+        "autoEnterHint": "창을 닫으면 {{n}}초 후 자동으로 경량 모드가 활성화됩니다"
       }
     },
     "backup": {

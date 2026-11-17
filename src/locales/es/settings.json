@@ -322,7 +322,7 @@
         "delay": "Retraso para entrar automáticamente en modo ligero"
       },
       "messages": {
-        "autoEnterHint": "Después de cerrar la ventana, el modo ligero se activará automáticamente después de {{n}} minutos"
+        "autoEnterHint": "Después de cerrar la ventana, el modo ligero se activará automáticamente después de {{n}} segundos"
       }
     },
     "backup": {
