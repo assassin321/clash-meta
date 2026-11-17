@@ -1,0 +1,68 @@
+name: Frontend Check
+
+on:
+  pull_request:
+    paths:
+      - "src/**"
+      - "**/*.js"
+      - "**/*.ts"
+      - "**/*.tsx"
+      - "**/*.css"
+      - "**/*.scss"
+      - "**/*.json"
+      - "**/*.md"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "vite.config.*"
+      - ".github/workflows/frontend-check.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  HUSKY: 0
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          run_install: false
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '26.13.0'
+          cache: 'pnpm'
+
+      - name: Restore pnpm cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.pnpm-store
+          key: "pnpm-shared-stable-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}"
+          restore-keys: |
+            pnpm-shared-stable-${{ runner.os }}-
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Run Prettier check
+        run: pnpm format:check
+
+      - name: Run ESLint
+        run: pnpm lint
+
+      - name: Run TypeScript typecheck
+        run: pnpm typecheck
+
+      - name: Run tests
+        run: pnpm test
+
+      - name: Run Knip
+        run: pnpm knip:check
+
+      - name: Architecture gates (listen/emit only in the event bus, invoke only in services)
+        run: node scripts/check-architecture.mjs listen emit invoke
