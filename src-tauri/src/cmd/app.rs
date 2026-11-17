@@ -56,6 +56,7 @@ pub async fn restart_app() -> CmdResult<()> {
 }
 
 #[tauri::command]
+#[specta::specta]
 pub fn get_portable_flag() -> bool {
     *dirs::PORTABLE_FLAG.get().unwrap_or(&false)
 }
