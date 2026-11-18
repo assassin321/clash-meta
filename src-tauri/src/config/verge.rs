@@ -403,7 +403,7 @@ impl IVerge {
             use_default_bypass: Some(true),
             proxy_guard_duration: Some(30),
             auto_close_connection: Some(true),
-            auto_check_update: Some(true),
+            auto_check_update: Some(false),
             enable_builtin_enhanced: Some(true),
             auto_log_clean: Some(2), // 1: 1天, 2: 7天, 3: 30天, 4: 90天
             enable_auto_backup_schedule: Some(false),
@@ -418,7 +418,7 @@ impl IVerge {
             tray_inline_outbound_modes: Some(false),
             enable_global_hotkey: Some(true),
             enable_auto_light_weight_mode: Some(true),
-            auto_light_weight_seconds: Some(3),
+            auto_light_weight_seconds: Some(1),
             enable_dns_settings: Some(false),
             home_cards: None,
             enable_external_controller: Some(false),

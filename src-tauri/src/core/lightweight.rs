@@ -206,7 +206,7 @@ fn cancel_webview_focus_listener() {
 }
 
 async fn setup_light_weight_timer() {
-    let once_by_seconds = Config::verge().await.data_arc().auto_light_weight_seconds.unwrap_or(3);
+    let once_by_seconds = Config::verge().await.data_arc().auto_light_weight_seconds.unwrap_or(1);
 
     let mut cancel_tx_guard = CANCEL_TX.lock();
     if cancel_tx_guard.is_some() {
@@ -241,7 +241,7 @@ async fn setup_light_weight_timer() {
     logging!(
         info,
         Type::Timer,
-        "Lightweight mode timer set, entering lightweight mode in {} minutes",
+        "Lightweight mode timer set, entering lightweight mode in {} seconds",
         once_by_seconds
     );
 }
