@@ -241,7 +241,7 @@ async fn setup_light_weight_timer() {
     logging!(
         info,
         Type::Timer,
-        "Lightweight mode timer set, entering lightweight mode in {} seconds",
+        "Lightweight mode timer set, entering lightweight mode in {} minutes",
         once_by_seconds
     );
 }
